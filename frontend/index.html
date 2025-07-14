@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Flight Search</title>
+      <link href="./dist/styles.css" rel="stylesheet">
+      <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+      <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+      <script src="./src/scripts/flights.js"></script>
+   </head>
+   <body class="bg-white">
+      <div x-data="flightApp()" class="mx-auto max-w-4xl p-4">
+         <div class="fixed max-w-4xl w-screen z-10 bg-white">
+            <div class="p-4 flex items-center justify-between">
+               <div class="flex gap-8">
+                  <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                        <path fill-rule="evenodd"
+                           d="M2 3.75A.75.75 0 0 1 2.75 3h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75ZM2 8a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 8Zm0 4.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z"
+                           clip-rule="evenodd"/>
+                     </svg>
+                  </button>
+                  <h1 class="text-gray-700 font-medium text-lg">Ajaali Flights</h1>
+               </div>
+               <div class="flex items-center pr-2">
+                  <span class="text-white bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-semibold">S</span>
+               </div>
+            </div>
+            <hr/>
+         </div>
+         <div class="flex pb-1 pt-20" x-init="
+            initDropdown('tripType', { label: 'Round Trip', items: [[1, 'One Way'], [2, 'Round Trip']], hasIcon: true, icon: 'roundtrip' });
+            initDropdown('passengerCount', { label: '1 Passenger', items: [[1, '1'], [2, '2']], hasIcon: true, icon: 'person' });
+            initDropdown('classType', { label: 'Economy', items: [[1,'Economy'], [2,'Business'], [3,'First Class']], multiple: false });
+            ">
+            <div x-data="{ key: 'tripType' }" x-init="loadDropdownHTML($el)"></div>
+            <div x-data="{ key: 'passengerCount' }" x-init="loadDropdownHTML($el)"></div>
+            <div x-data="{ key: 'classType' }" x-init="loadDropdownHTML($el)"></div>
+         </div>
+         <div class="w-full">
+            <div class="flex items-center w-full relative">
+               <div class="w-1/2 pr-1 relative">
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                        class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                           d="M16.712 4.33a9.027 9.027 0 0 1 1.652 1.306c.51.51.944 1.064 1.306 1.652M16.712 4.33l-3.448 4.138m3.448-4.138a9.014 9.014 0 0 0-9.424 0M19.67 7.288l-4.138 3.448m4.138-3.448a9.014 9.014 0 0 1 0 9.424m-4.138-5.976a3.736 3.736 0 0 0-.88-1.388 3.737 3.737 0 0 0-1.388-.88m2.268 2.268a3.765 3.765 0 0 1 0 2.528m-2.268-4.796a3.765 3.765 0 0 0-2.528 0m4.796 4.796c-.181.506-.475.982-.88 1.388a3.736 3.736 0 0 1-1.388.88m2.268-2.268 4.138 3.448m0 0a9.027 9.027 0 0 1-1.306 1.652c-.51.51-1.064.944-1.652 1.306m0 0-3.448-4.138m3.448 4.138a9.014 9.014 0 0 1-9.424 0m5.976-4.138a3.765 3.765 0 0 1-2.528 0m0 0a3.736 3.736 0 0 1-1.388-.88 3.737 3.737 0 0 1-.88-1.388m2.268 2.268L7.288 19.67m0 0a9.024 9.024 0 0 1-1.652-1.306 9.027 9.027 0 0 1-1.306-1.652m0 0 4.138-3.448M4.33 16.712a9.014 9.014 0 0 1 0-9.424m4.138 5.976a3.765 3.765 0 0 1 0-2.528m0 0c.181-.506.475-.982.88-1.388a3.736 3.736 0 0 1 1.388-.88m-2.268 2.268L4.33 7.288m6.406 1.18L7.288 4.33m0 0a9.024 9.024 0 0 0-1.652 1.306A9.025 9.025 0 0 0 4.33 7.288"/>
+                     </svg>
+                  </span>
+                  <input
+                     type="text"
+                     value="London"
+                     x-model="fromLocation"
+                     class="w-full pl-12 pr-4 py-3 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                     />
+               </div>
+               <button
+                  class="z-10 absolute left-1/2 transform -translate-x-1/2 bg-white border-collapse border-x-2 border-gray-300 rounded-full p-1.5"
+                  aria-label="Swap">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                     <path fill-rule="evenodd"
+                        d="M10.47 2.22a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 1 1-1.06-1.06l.97-.97H5.75a.75.75 0 0 1 0-1.5h5.69l-.97-.97a.75.75 0 0 1 0-1.06Zm-4.94 6a.75.75 0 0 1 0 1.06l-.97.97h5.69a.75.75 0 0 1 0 1.5H4.56l.97.97a.75.75 0 1 1-1.06 1.06l-2.25-2.25a.75.75 0 0 1 0-1.06l2.25-2.25a.75.75 0 0 1 1.06 0Z"
+                        clip-rule="evenodd"/>
+                  </svg>
+               </button>
+               <div class="w-1/2 pl-1 relative">
+                  <span class="absolute  px-2 left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                        class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                           d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
+                     </svg>
+                  </span>
+                  <input
+                     type="text"
+                     value="Amsterdam"
+                     x-model="toLocation"
+                     class="w-full pl-12 pr-4 py-3 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                     />
+               </div>
+            </div>
+         </div>
+         <!--   Date input-->
+         <div class="flex justify-center w-full max-w-4xl mx-auto py-2">
+            <div class="relative w-1/2">
+               <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-2 top-1/2 transform -translate-y-2 h-7 w-7 text-gray-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  >
+                  <path d="M5.75 7.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM7.25 8.25A.75.75 0 0 1 8 7.5h2.25a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75ZM5.75 9.5a.75.75 0 0 0 0 1.5H8a.75.75 0 0 0 0-1.5H5.75Z"/>
+                  <path fill-rule="evenodd"
+                     d="M4.75 1a.75.75 0 0 0-.75.75V3a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2V1.75a.75.75 0 0 0-1.5 0V3h-5V1.75A.75.75 0 0 0 4.75 1ZM3.5 7a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v4.5a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V7Z"
+                     clip-rule="evenodd"/>
+               </svg>
+               <input
+                  type="date"
+                  id="fromDate"
+                  class="absolute inset-0 opacity-0 w-full cursor-pointer"
+                  value="2024-10-03"
+                  onchange="updateDateDisplay('fromDateDisplay', 'fromDate')"
+                  />
+               <div id="fromDateDisplay"
+                  class="w-full pl-10 pr-10 py-3 bg-white text-gray-700 border border-gray-300 rounded-r-md cursor-pointer"
+                  onclick="document.getElementById('fromDate').click()">
+                  Select a Date
+               </div>
+               <button onclick="changeDate(-1, 'fromDate')"
+                  class="absolute right-10 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                  </svg>
+               </button>
+               <button onclick="changeDate(1, 'fromDate')"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+               </button>
+            </div>
+
+            <div class="relative w-1/2">
+               <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-2 top-1/2 transform -translate-y-2 h-7 w-7 text-gray-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  >
+                  <path d="M5.75 7.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM7.25 8.25A.75.75 0 0 1 8 7.5h2.25a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75ZM5.75 9.5a.75.75 0 0 0 0 1.5H8a.75.75 0 0 0 0-1.5H5.75Z"/>
+                  <path fill-rule="evenodd"
+                     d="M4.75 1a.75.75 0 0 0-.75.75V3a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2V1.75a.75.75 0 0 0-1.5 0V3h-5V1.75A.75.75 0 0 0 4.75 1ZM3.5 7a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v4.5a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V7Z"
+                     clip-rule="evenodd"/>
+               </svg>
+               <input
+                  type="date"
+                  id="toDate"
+                  class="absolute inset-0 opacity-0 w-full cursor-pointer"
+                  value="2024-10-10"
+                  onchange="updateDateDisplay('fromDateDisplay', 'fromDate')"
+                  />
+               <div id="toDateDisplay"
+                  class="w-full pl-10 pr-10 py-3 bg-white text-gray-700 border border-gray-300 rounded-r-md cursor-pointer"
+                  onclick="document.getElementById('toDate').click()">
+                  Select a Date
+               </div>
+               <button onclick="changeDate(-1, 'toDate')"
+                  class="absolute right-10 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                  </svg>
+               </button>
+               <button onclick="changeDate(1, 'toDate')"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+               </button>
+            </div>
+         </div>
+
+
+         <div class="flex items-center">
+            <div class="no-scrollbar flex gap-1 whitespace-nowrap overflow-x-auto" x-init="
+               initDropdown('allFilter', { label: 'All filter', items: [[1,'Filter 1'], [2,'Filter 2']], hasIcon: true, textColor: 'text-blue-700', icon: 'filter' });
+               initDropdown('stops', { label: 'Stops', items: [[1000, 'Any number of stops'], [0,'Non stop only'], [1,'One stop or fewer'], [2,'Two stop or fewer']], hasIcon: false, borderColor: 'border-gray-300', textColor: 'text-grey-700' });
+               initDropdown('airlines', { label: 'Airlines', items: [['AIR FRANCE','Air France'], ['BRITISH AIRWAYS','British Airways'], ['EASYJET','easyJet'], ['KLM','KLM']], hasIcon: false, borderColor: 'border-gray-300', textColor: 'text-grey-700', multiple: true });
+               initDropdown('bags', { label: 'Bags', items: [[1,'Filter 1'], [2,'Filter 2']], hasIcon: false, borderColor: 'border-gray-300', textColor: 'text-grey-700' });
+               initDropdown('price', { label: 'Price', items: [[1,'Filter 1'], [2,'Filter 2']], hasIcon: false, borderColor: 'border-gray-300', textColor: 'text-grey-700' });
+               initDropdown('times', { label: 'Times', items: [[1,'Filter 1'], [2,'Filter 2']], hasIcon: false, borderColor: 'border-gray-300', textColor: 'text-grey-700' });
+               initDropdown('emissions', { label: 'Emissions', items: [[1,'Filter 1'], [2,'Filter 2']], hasIcon: false, borderColor: 'border-gray-300', textColor: 'text-grey-700' });
+               initDropdown('extra1', { label: 'Extra', items: [[1,'Filter 1'], [2,'Filter 2']], hasIcon: false, borderColor: 'border-gray-300', textColor: 'text-grey-700' });
+               initDropdown('extra2', { label: 'Extra', items: [[1,'Filter 1'], [2,'Filter 2']], hasIcon: false, borderColor: 'border-gray-300', textColor: 'text-grey-700' });
+               ">
+               <div x-data="{ key: 'allFilter' }" x-init="loadDropdownHTML($el)"></div>
+               <div x-data="{ key: 'stops' }" x-init="loadDropdownHTML($el)"></div>
+               <div x-data="{ key: 'airlines' }" x-init="loadDropdownHTML($el)"></div>
+               <div x-data="{ key: 'bags' }" x-init="loadDropdownHTML($el)"></div>
+               <div x-data="{ key: 'price' }" x-init="loadDropdownHTML($el)"></div>
+               <div x-data="{ key: 'times' }" x-init="loadDropdownHTML($el)"></div>
+               <div x-data="{ key: 'emissions' }" x-init="loadDropdownHTML($el)"></div>
+               <div x-data="{ key: 'extra1' }" x-init="loadDropdownHTML($el)"></div>
+               <div x-data="{ key: 'extra2' }" x-init="loadDropdownHTML($el)"></div>
+            </div>
+            <div class="bg-white text-white p-2">
+               <button @click="fetchFlights()" class="bg-blue-500 text-white px-4 py-1 rounded">Search</button>
+            </div>
+         </div>
+         <div class="max-w-4xl mx-auto p-4">
+            <div class="flex justify-between" x-init="
+               initDropdown('sorting', { label: 'Sort by', labelSelected: true, hasIcon: true, textColor: 'text-blue-700', hasIcon: false, items: [['-', 'Top Flights'] , ['price', 'Price'], ['departure_dt', 'Departure time'],['arrival_dt', 'Arrival time'], ['duration', 'Durations'], ['emmission', 'Emmission']]});">
+               <h2 class="text-xl font-bold mb-2">Top departing options</h2>
+               <div x-data="{ key: 'sorting' }" x-init="loadDropdownHTML($el)"></div>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">Ranked based on price and convenience. Prices include required taxes +
+               fees for 1 adult. Optional charges and <a href="#" class="text-blue-500 hover:underline">bag fees</a> may
+               apply. <a href="#" class="text-blue-500 hover:underline">Passenger assistance info.</a>
+            </p>
+            <div>
+               <template x-if="!hasSearched">
+                  <p class="text-gray-500">Enter a search term to find flights from the backend.</p>
+               </template>
+               <template x-if="hasSearched && flights.length === 0">
+                  <p class="text-red-500">No flights found for your search.</p>
+               </template>
+               <template x-if="error">
+                  <p class="text-red-500" x-text="`${error}`"></p>
+               </template>
+               <template x-if="hasSearched">
+                  <template x-for="flight in flights">
+                     <div class="flex items-center p-4 border hover:shadow-md transition-shadow -mb-px">
+                        <div class="flex-shrink-0 mr-4">
+                           <img :src="flight.logo" alt="Airline Logo" class="w-10 h-10">
+                        </div>
+                        <div class="flex-1">
+                           <div class="flex flex-col">
+                              <div class="text-lg font-semibold"
+                                 x-text="`${flight.departureTime} – ${flight.arrivalTime}`"></div>
+                              <div class="text-sm text-gray-500" x-text="`${flight.source}–${flight.sink}`"></div>
+                           </div>
+                           <div class="text-sm text-gray-500" x-text="`${flight.details}`"></div>
+                        </div>
+                        <div class="flex flex-col items-start">
+                           <div class="text-lg font-bold text-gray-900" x-text="`£${flight.price}`"></div>
+                           <div class="text-sm text-gray-500">Round trip</div>
+                           <div class="text-sm text-gray-500" x-text="`${flight.emissions}% emissions`"></div>
+                        </div>
+                        <div class="ml-4">
+                           <button class="text-gray-600 hover:text-gray-800 focus:outline-none">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"/>
+                              </svg>
+                           </button>
+                        </div>
+                     </div>
+                  </template>
+               </template>
+
+               <p class="py-4"><b>Other departing flight (Example)</b></p>
+               <div class="flex items-center p-4 border hover:shadow-md transition-shadow -mb-px">
+                  <div class="flex-shrink-0 mr-4">
+                     <img src="https://via.placeholder.com/40" alt="Airline Logo" class="w-10 h-10">
+                  </div>
+                  <div class="flex-1">
+                     <div class="flex flex-col">
+                        <div class="text-lg font-semibold">18:10 – 20:25</div>
+                        <div class="text-sm text-gray-500">LGW–AMS</div>
+                     </div>
+                     <div class="text-sm text-gray-500">Non-stop · 1 hr 15 min · easyJet</div>
+                  </div>
+                  <div class="flex flex-col items-start">
+                     <div class="text-lg font-bold text-gray-900">£190</div>
+                     <div class="text-sm text-gray-500">Round trip</div>
+                     <div class="text-sm text-gray-500">+23% emissions</div>
+                  </div>
+                  <div class="ml-4">
+                     <button class="text-gray-600 hover:text-gray-800 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                           stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                     </button>
+                  </div>
+               </div>
+               <div class="flex items-center p-4 border hover:shadow-md transition-shadow -mb-px">
+                  <div class="flex-shrink-0 mr-4">
+                     <img src="https://via.placeholder.com/40" alt="Airline Logo" class="w-10 h-10">
+                  </div>
+                  <div class="flex-1">
+                     <div class="flex flex-col">
+                        <div class="text-lg font-semibold">12:10 – 13:25</div>
+                        <div class="text-sm text-gray-500">LHR–AMS</div>
+                     </div>
+                     <div class="text-sm text-gray-500">Non-stop · 1 hr 15 min · easyJet</div>
+                  </div>
+                  <div class="flex flex-col items-start">
+                     <div class="text-lg font-bold text-gray-900">£150</div>
+                     <div class="text-sm text-gray-500">Round trip</div>
+                     <div class="text-sm text-gray-500">+23% emissions</div>
+                  </div>
+                  <div class="ml-4">
+                     <button class="text-gray-600 hover:text-gray-800 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                           stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                     </button>
+                  </div>
+               </div>
+               <div class="flex items-center p-4 border hover:shadow-md transition-shadow -mb-px">
+                  <div class="flex-shrink-0 mr-4">
+                     <img src="https://via.placeholder.com/40" alt="Airline Logo" class="w-10 h-10">
+                  </div>
+                  <div class="flex-1">
+                     <div class="flex flex-col">
+                        <div class="text-lg font-semibold">08:10 – 9:25</div>
+                        <div class="text-sm text-gray-500">LGW–AMS</div>
+                     </div>
+                     <div class="text-sm text-gray-500">Non-stop · 1 hr 15 min · easyJet</div>
+                  </div>
+                  <div class="flex flex-col items-start">
+                     <div class="text-lg font-bold text-gray-900">£250</div>
+                     <div class="text-sm text-gray-500">Round trip</div>
+                     <div class="text-sm text-gray-500">+23% emissions</div>
+                  </div>
+                  <div class="ml-4">
+                     <button class="text-gray-600 hover:text-gray-800 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                           stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

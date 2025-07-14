@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "fullstack-solution"
+version = "0.1.0"
+description = ""
+authors = ["Tobey Asinugo <tobey.asinugo@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.2"
+uvicorn = "^0.32.0"
+boto3 = "^1.35.45"
+pydantic = "^2.9.2"
+python-dotenv = "^1.0.1"
+aws-cdk-lib = "^2.162.1"
+constructs = "^10.4.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+black = "^24.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
